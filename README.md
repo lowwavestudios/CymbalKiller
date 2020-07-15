@@ -1,4 +1,4 @@
-# CymbalKiller
+# Cymbal Killer
 2-band Drum Gate
 
 Cymbal Killer is a 2-band Gate especially designed for drums. 
