@@ -11,3 +11,5 @@ It allows the sustain to breathe while keeping the attack short to kill the cymb
 - Mix slider for allowing a mix between the original clean signal and the gated signal;
 
 Made using the JUCE framework
+
+
