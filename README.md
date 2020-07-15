@@ -13,3 +13,4 @@ It allows the sustain to breathe while keeping the attack short to kill the cymb
 Made using the JUCE framework
 
 
+![Screenshot](cymbalkiller2.png)
