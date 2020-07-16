@@ -35,7 +35,7 @@ IceyGateAudioProcessorEditor::IceyGateAudioProcessorEditor (IceyGateAudioProcess
     setSize((2.f/3.f) * screenHeight, screenHeight);
 
 
-    help.reset(new HyperlinkButton(TRANS("?"), URL("http://www.juce.com"))); //Help link
+    help.reset(new HyperlinkButton(TRANS("?"), URL("http://www.lowwavestudios.com/#software_section"))); //Help link
     addAndMakeVisible(help.get());
     help->setTooltip(TRANS("Help"));
     help->setColour(HyperlinkButton::textColourId, Colours::antiquewhite);
