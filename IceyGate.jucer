@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<JUCERPROJECT id="F7lPWg" name="Cymbal Killer" projectType="audioplug" pluginFormats="buildAU,buildAUv3,buildVST,buildVST3"
-              cppLanguageStandard="latest" companyEmail="lowwavestudios@gmail.com"
-              companyName="LowWaveStudios" pluginDesc="Drum Gate" displaySplashScreen="1"
-              jucerFormatVersion="1" version="1.0.0" pluginVST3Category="Dynamics"
-              pluginRTASCategory="2" pluginAAXCategory="2">
+<JUCERPROJECT id="F7lPWg" name="Cymbal Killer" projectType="audioplug" pluginFormats="buildVST3"
+              companyEmail="lowwavestudios@gmail.com" companyName="Low Wave Studios"
+              pluginDesc="Drum Gate" jucerFormatVersion="1" version="1.0.0"
+              pluginVST3Category="Dynamics" pluginRTASCategory="2" pluginAAXCategory="2"
+              displaySplashScreen="1">
   <MAINGROUP id="dEQmfC" name="Cymbal Killer">
     <GROUP id="{01EBAD70-2003-09B8-0B64-A7449A6F3157}" name="Source">
       <FILE id="moKQZB" name="Compressor2.h" compile="0" resource="0" file="Source/Compressor2.h"/>
