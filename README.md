@@ -12,7 +12,9 @@ It allows the sustain to breathe while keeping the attack short to kill the cymb
 
 Made using the JUCE framework
 
-//1.0.0 - Fixed strange behaviour of channel input/output count when adding sidechain in DAW;
-        - Added version numbering on GUI.
+Changelog:
+1.0.0 
+- Fixed strange behaviour of channel input/output count when adding sidechain in DAW;
+- Added version numbering on GUI.
 
 ![Screenshot](cymbalkiller2.png)
