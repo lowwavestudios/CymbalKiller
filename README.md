@@ -13,12 +13,9 @@ It allows the sustain to breathe while keeping the attack short to kill the cymb
 Made using the JUCE framework
 
 Changelog:
-1.0.2
-- Added parametric filter on sidechain circuit;
-1.0.1
-- Fixed strange behaviour on sidechain filters;
-1.0.0 
-- Fixed strange behaviour of channel input/output count when adding sidechain in DAW;
-- Added version numbering on GUI.
+- 1.0.2 - Added parametric filter on sidechain circuit;
+- 1.0.1 - Fixed strange behaviour on sidechain filters;
+- 1.0.0 - Fixed strange behaviour of channel input/output count when adding sidechain in DAW;
+          Added version numbering on GUI.
 
 ![Screenshot](CymballKiller.png)
