@@ -190,7 +190,7 @@ private:
     Slider attackLowSlider;
     Slider releaseLowSlider, holdLowSlider;
     
-    Slider crossoverSlider, scHPFSlider, scLPFSlider;
+    Slider crossoverSlider, scHPFSlider, scLPFSlider, scPeakFreqSlider, scPeakGainSlider;
 
     Slider inputGainSlider, outputGainSlider, mixSlider;
     buttonLookAndFeel buttonLAF;
@@ -224,6 +224,11 @@ public:
         scHPFSliderValue;
     std::unique_ptr<AudioProcessorValueTreeState::SliderAttachment>
         scLPFSliderValue;
+
+    std::unique_ptr<AudioProcessorValueTreeState::SliderAttachment>
+        scPeakFreqSliderValue;
+    std::unique_ptr<AudioProcessorValueTreeState::SliderAttachment>
+        scPeakGainSliderValue;
 
     std::unique_ptr<AudioProcessorValueTreeState::SliderAttachment>
         thresholdSliderValue;

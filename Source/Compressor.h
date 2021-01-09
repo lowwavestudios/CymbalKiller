@@ -2,6 +2,7 @@
 
 //#include "AudioDevEffect.h"
 #include "EnvelopeShaper.h"
+#include "SidechainEQ.h"
 
 #include <cmath>
 #include <algorithm>
@@ -13,8 +14,8 @@ public:
     void prepareForPlayback(float samplerate, int numSamp, int numChannels) //override
     {
         m_EnvelopeShaper.prepareForPlayback(samplerate);
-        HPF.coefficients = dsp::IIR::Coefficients<float>::makeHighPass(samplerate, 20.f, 1.f);
-        LPF.coefficients = dsp::IIR::Coefficients<float>::makeLowPass(samplerate, 20000.f, 1.f);
+
+        sidechainEq.initFilters(samplerate, numSamp, 1);
 
         sideChain.setSize(1, numSamp, false, false, false);
 
@@ -67,25 +68,27 @@ public:
                 }
                 else { detectionSignal = L; }
          
-                //filter sidechain
-                detectionSignal = HPF.processSample(detectionSignal);
-                detectionSignal = LPF.processSample(detectionSignal);
 
-                
-                // rectify detection signal
-                //detectionSignal = fabs(detectionSignal);
-                //detectionSignal *= -1.f;
+                w[i] = detectionSignal;
 
+
+            }
+
+            sidechainEq.process(sideChain); //filter sidechain
+
+            for (int i = 0; i < numsamples; i++)
+            {
                 // apply envelope shaping to detection signal
+                float detectionSignal = sideChain.getSample(0, i);
+
                 m_EnvelopeShaper.processAudioSample(detectionSignal);
 
                 // check if the detection signal exceeds the threshold
                 detectionSignal = amplitudeToDecibel(detectionSignal);
 
                 w[i] = detectionSignal;
-
-
             }
+
         }
         else 
         {
@@ -115,23 +118,25 @@ public:
                     detectionSignal = inputBuffer.getSample(ch, i);
                 }
 
-                //filter sidechain
-                detectionSignal = HPF.processSample(detectionSignal);
-                detectionSignal = LPF.processSample(detectionSignal);
 
 
-                // rectify detection signal
-                //detectionSignal = fabs(detectionSignal);
-                //detectionSignal *= -1.f;
+                w[i] = detectionSignal;
 
+            }
+
+            sidechainEq.process(sideChain); //filter sidechain
+
+            for (int i = 0; i < numsamples; i++)
+            {
                 // apply envelope shaping to detection signal
+                float detectionSignal = sideChain.getSample(0, i);
+
                 m_EnvelopeShaper.processAudioSample(detectionSignal);
 
                 // check if the detection signal exceeds the threshold
                 detectionSignal = amplitudeToDecibel(detectionSignal);
 
                 w[i] = detectionSignal;
-
             }
         }
         
@@ -169,7 +174,7 @@ public:
         
     }
     // callback for audio processing
-    void processAudioSample(float & sample) //override
+    /*void processAudioSample(float & sample) //override
     {
         // copy signal in detection signal
         float detectionSignal = sample;
@@ -201,20 +206,16 @@ public:
             sample *= gain;
         }
     }
-    
+    */
     float getTick()
     {
         
         return tick;
     }
-    void setSC(float hpf, float lpf, double samplerate)
+    void setSC(float hpf, float lpf, float peqFreq, float peqGain, double samplerate)
     {
-        HPF.snapToZero();
-        LPF.snapToZero();
 
-        HPF.coefficients = dsp::IIR::Coefficients<float>::makeHighPass(samplerate, hpf, 1.f);
-        LPF.coefficients = dsp::IIR::Coefficients<float>::makeLowPass(samplerate, lpf, 1.f);
-
+        sidechainEq.updateCoeffs(hpf, lpf, peqFreq, peqGain);
 
     }
     
@@ -243,15 +244,15 @@ public:
         m_EnvelopeShaper.setHold(hold);
     }
 
+    
+
 private:
     // compressor private variables
     float m_Threshold;
     float m_Ratio;
     float tick = 1.f;
-    dsp::IIR::Filter<float> HPF;
-    dsp::IIR::Filter<float> LPF;
-    dsp::IIR::Coefficients<float> hpfCoeffs;
-    dsp::IIR::Coefficients<float> lpfCoeffs;
+
+    SidechainEQ sidechainEq;
     
     EnvelopeShaper m_EnvelopeShaper;
 

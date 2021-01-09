@@ -20,6 +20,11 @@
 #define SCLOPASS_ID "side-chain LPF"
 #define SCLOPASS_NAME "Side-Chain LPF"
 
+#define SCPEAKFREQ_ID "side-chain peak freq."
+#define SCPEAKFREQ_NAME "Side-Chain Peak Freq."
+#define SCPEAKGAIN_ID "side-chain peak gain"
+#define SCPEAKGAIN_NAME "Side-Chain Peak Gain"
+
 #define THRESHOLD_ID "threshold high-freq"
 #define THRESHOLD_NAME "Threshold High-freq"
 #define THRESHOLD2_ID "threshold low-freq"
@@ -64,12 +69,13 @@
 #include <JuceHeader.h>
 #include "AudioDevEffect.h"
 #include "Compressor.h"
-#include "EnvelopeShaper.h"
+//#include "EnvelopeShaper.h"
 #include "Compressor2.h"
-#include "EnvelopeShaper2.h"
+//#include "EnvelopeShaper2.h"
 #include "EnvelopeShaperVisual.h"
 #include "EnvelopeShaperVisualLow.h"
 #include "DSPFilters4Juce/DSPFilters.h"
+//#include "SidechainEQ.h"
 
 
 //==============================================================================
@@ -193,7 +199,7 @@ public:
     Compressor compressor;
     Compressor2 compressorLowFreq;
 
-    float crossoverFreq, scHPF, scLPF;
+    float crossoverFreq, scHPF, scLPF, scPeakFreq, scPeakGain;
     int lastSampleRate {44100};
 
     int curRatio;

@@ -74,6 +74,9 @@ AudioProcessorValueTreeState::ParameterLayout IceyGateAudioProcessor::createPara
     auto soloHiParam = std::make_unique<AudioParameterBool>(SOLOHI_ID, SOLOHI_NAME, false);
     auto soloLowParam = std::make_unique<AudioParameterBool>(SOLOLOW_ID, SOLOLOW_NAME, false);
 
+    auto scPeakFreqParam = std::make_unique <AudioParameterFloat>(SCPEAKFREQ_ID, SCPEAKFREQ_NAME, 20.0f, 20000.0, 500.0f);
+    auto scPeakGainParam = std::make_unique <AudioParameterFloat>(SCPEAKGAIN_ID, SCPEAKGAIN_NAME, -24.f, 24.0f, 0.0f);
+
     params.push_back(std::move(crossoverParam));
     params.push_back(std::move(scHPFParam));
     params.push_back(std::move(scLPFParam));
@@ -96,6 +99,8 @@ AudioProcessorValueTreeState::ParameterLayout IceyGateAudioProcessor::createPara
 
     params.push_back(std::move(soloLowParam));
     params.push_back(std::move(soloHiParam));
+    params.push_back(std::move(scPeakFreqParam));
+    params.push_back(std::move(scPeakGainParam));
 
 
     return { params.begin(), params.end() };
@@ -201,6 +206,8 @@ void IceyGateAudioProcessor::setParams()
     crossoverFreq = *parameters.getRawParameterValue(CROSSOVER_ID);
     scHPF = *parameters.getRawParameterValue(SCHIPASS_ID);
     scLPF = *parameters.getRawParameterValue(SCLOPASS_ID);
+    scPeakFreq = *parameters.getRawParameterValue(SCPEAKFREQ_ID);
+    scPeakGain = *parameters.getRawParameterValue(SCPEAKGAIN_ID);
 
     inputGain = *parameters.getRawParameterValue(INPUT_ID);
     outputGain = *parameters.getRawParameterValue(OUTPUT_ID);
@@ -343,7 +350,7 @@ void IceyGateAudioProcessor::processBlock (AudioBuffer<float>& buffer, MidiBuffe
         compressor.setAttack(curAtkTimeHigh);
         compressor.setRelease(curRelTimeHigh);
         compressor.setHold(curHoldTimeHigh);
-        compressor.setSC(scHPF, scLPF, lastSampleRate);
+        compressor.setSC(scHPF, scLPF, scPeakFreq, scPeakGain, lastSampleRate);
     }
     
     {//set low Freq Compressor params
@@ -352,7 +359,7 @@ void IceyGateAudioProcessor::processBlock (AudioBuffer<float>& buffer, MidiBuffe
         compressorLowFreq.setAttack(curAtkTimeLow);
         compressorLowFreq.setRelease(curRelTimeLow);
         compressorLowFreq.setHold(curHoldTimeLow);
-        compressorLowFreq.setSC(scHPF, scLPF, lastSampleRate);
+        compressorLowFreq.setSC(scHPF, scLPF, scPeakFreq, scPeakGain, lastSampleRate);
     }
 
 
@@ -485,7 +492,6 @@ void IceyGateAudioProcessor::processBlock (AudioBuffer<float>& buffer, MidiBuffe
     lowBufferVisual.makeCopyOf(wetBufferLowFreq);
     hiPassFilter2.process(dsp::ProcessContextReplacing<float>(lowblock)); //hi pass buffer
     lowblock.multiplyBy(-1.f); //reverse polarity
-
 
     //add dry with hi pass reversed to get a low pass
     dsp::ProcessContextReplacing<float>lowpassedBlock(lowblock);

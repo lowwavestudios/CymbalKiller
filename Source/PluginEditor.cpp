@@ -49,6 +49,9 @@ IceyGateAudioProcessorEditor::IceyGateAudioProcessorEditor (IceyGateAudioProcess
     scHPFSliderValue = std::make_unique <AudioProcessorValueTreeState::SliderAttachment>(processor.parameters, SCHIPASS_ID, scHPFSlider);
     scLPFSliderValue = std::make_unique <AudioProcessorValueTreeState::SliderAttachment>(processor.parameters, SCLOPASS_ID, scLPFSlider);
 
+    scPeakFreqSliderValue = std::make_unique <AudioProcessorValueTreeState::SliderAttachment>(processor.parameters, SCPEAKFREQ_ID, scPeakFreqSlider);
+    scPeakGainSliderValue = std::make_unique <AudioProcessorValueTreeState::SliderAttachment>(processor.parameters, SCPEAKGAIN_ID, scPeakGainSlider);
+
     thresholdSliderValue = std::make_unique <AudioProcessorValueTreeState::SliderAttachment>(processor.parameters, THRESHOLD_ID, thresholdSlider);
     attackSliderValue = std::make_unique <AudioProcessorValueTreeState::SliderAttachment>(processor.parameters, ATTACK_ID, attackSlider);
     holdSliderValue = std::make_unique <AudioProcessorValueTreeState::SliderAttachment>(processor.parameters, HOLD_ID, holdSlider);
@@ -157,6 +160,18 @@ IceyGateAudioProcessorEditor::IceyGateAudioProcessorEditor (IceyGateAudioProcess
     scLPFSlider.setDoubleClickReturnValue(true, 20000.f);
     scLPFSlider.setSliderSnapsToMousePosition(true);
 
+    addAndMakeVisible(&scPeakFreqSlider);
+    scPeakFreqSlider.setRange(20.0f, 20000.f, 1.0f);
+    scPeakFreqSlider.addListener(this);
+    scPeakFreqSlider.setDoubleClickReturnValue(true, 500.f);
+    scPeakFreqSlider.setSliderSnapsToMousePosition(true);
+
+    addAndMakeVisible(&scPeakGainSlider);
+    scPeakGainSlider.setRange(-24.0f, 24.f, 0.0f);
+    scPeakGainSlider.addListener(this);
+    scPeakGainSlider.setDoubleClickReturnValue(true, 0.f);
+    scPeakGainSlider.setSliderSnapsToMousePosition(true);
+
     addAndMakeVisible(&mixSlider);
     mixSlider.setRange(0.f, 100.f, 1.f);
     mixSlider.setDoubleClickReturnValue(true, 100.f);
@@ -194,13 +209,18 @@ IceyGateAudioProcessorEditor::IceyGateAudioProcessorEditor (IceyGateAudioProcess
     outputGainSlider.setTextValueSuffix(" dB");
     mixSlider.setTextValueSuffix("%");
 
-    scHPFSlider.setTextValueSuffix(" Hz");
-    scLPFSlider.setTextValueSuffix(" Hz");
+    scHPFSlider.setTextValueSuffix(" Hz (HPF)");
+    scLPFSlider.setTextValueSuffix(" Hz (LPF)");
+
+    scPeakFreqSlider.setTextValueSuffix(" Hz (PEQ)");
+    scPeakGainSlider.setTextValueSuffix(" dB (PEQ)");
 
     crossoverSlider.setSkewFactorFromMidPoint(1000.0f);
     attackSlider.setSkewFactorFromMidPoint(10.0f);
     scHPFSlider.setSkewFactorFromMidPoint(500.0f);
     scLPFSlider.setSkewFactorFromMidPoint(2000.0f);
+    scPeakFreqSlider.setSkewFactorFromMidPoint(1000.0f);
+    scPeakGainSlider.setSkewFactorFromMidPoint(0.0f);
     releaseSlider.setSkewFactorFromMidPoint(250.0f);
     holdSlider.setSkewFactorFromMidPoint(100.f);
 
@@ -323,9 +343,8 @@ void IceyGateAudioProcessorEditor::paint (Graphics& g)
         g.setColour(Colours::whitesmoke);
         
         g.setOpacity(0.5f);
-        //g.setFont(Font::bold);
         g.setFont(square);
-        g.drawText("1.0.0", windowWidth - (square * 6), square * 1.5f, square * 4, square, Justification::centred);
+        g.drawText(JucePlugin_VersionString, windowWidth - (square * 6), square * 1.5f, square * 4, square, Justification::centred);
 
     }
     
@@ -368,7 +387,7 @@ void IceyGateAudioProcessorEditor::paint (Graphics& g)
     paramTextStyle(g, "Lookahead", laButton.getX() + (2*square), laButton.getY() - (0.75 * square), area.getWidth() * 0.25f, windowHeight * (10.f / 600.f), false, Justification::centredLeft);
     paramTextStyle(g, "Side-Chain", scButton.getX() + (2 * square), scButton.getY() - (0.75 * square), area.getWidth() * 0.25f, windowHeight* (10.f / 600.f), false, Justification::centredLeft);
 
-    paramTextStyle(g, "Detection Filters", scHPFSlider.getX() + scHPFSlider.getWidth() + (0.5*square), scHPFSlider.getY() - (0.75 * square), area.getWidth() * 0.25f, windowHeight * (10.f / 600.f), false, Justification::centredLeft);
+    paramTextStyle(g, "Detection Filters", scHPFSlider.getX() + scHPFSlider.getWidth() + (0.5*square), scHPFSlider.getY() - (0.75 * square) + square, area.getWidth() * 0.25f, windowHeight * (10.f / 600.f), false, Justification::centredLeft);
 
     paramTextStyle(g, "Attack (Low-Band)", attackLowSlider.getX(), attackLowSlider.getY() - (sliderHeight * 0.65), attackLowSlider.getWidth(), windowHeight * (10.f / 600.f), false, Justification::horizontallyCentred, Colour::fromRGBA(171, 171, 171, 0.75));
     paramTextStyle(g, "Hold (Low-Band)", holdLowSlider.getX(), holdLowSlider.getY() - (sliderHeight * 0.65), holdLowSlider.getWidth(), windowHeight * (10.f / 600.f), false, Justification::horizontallyCentred, Colour::fromRGBA(171, 171, 171, 0.75));
@@ -426,7 +445,7 @@ void IceyGateAudioProcessorEditor::resized()
     processor.visualiser.setBounds(21 * square, 9 * square, releaseSlider.getWidth(), sliderHeight * 4);
     processor.visualiserLowFreq.setBounds(square, 9 * square, releaseSlider.getWidth(), sliderHeight * 4);
 
-    juce::Rectangle<int>(area.removeFromBottom(sliderHeight * 0.5));
+    juce::Rectangle<int>(area.removeFromBottom(sideMargin * 0.5));
     crossoverSlider.setBounds(area.removeFromBottom(sliderHeight).reduced(sideMargin).removeFromRight(area.getWidth() * 0.75f));
     
     auto sliderTrueHeight = 3 * square;
@@ -449,6 +468,8 @@ void IceyGateAudioProcessorEditor::resized()
     scHPFSlider.setBounds(sideMargin, 30 * square, sliderTrueWidth / 2, sliderTrueHeight / 2);
     scLPFSlider.setBounds(24 * square, 30 * square, sliderTrueWidth / 2, sliderTrueHeight / 2);
     
+    scPeakFreqSlider.setBounds(sideMargin, (31 * square) + (sliderTrueHeight / 2), sliderTrueWidth / 2, sliderTrueHeight / 2);
+    scPeakGainSlider.setBounds(24 * square, (31 * square) + (sliderTrueHeight / 2), sliderTrueWidth / 2, sliderTrueHeight / 2);
 
     //Button Style
     laButton.setBounds(sideMargin, windowHeight - sideMargin - (sliderTrueHeight / 2), sliderTrueHeight, sliderTrueHeight / 2);
@@ -673,15 +694,25 @@ void IceyGateAudioProcessorEditor::newSliderStyle(Colour textColour, float track
     outputGainSlider.setSliderStyle(Slider::LinearBar);
     outputGainSlider.setAlpha(trackTransp);
 
-    scHPFSlider.setColour(Slider::trackColourId, Colour(165, 71, 7));
+    scHPFSlider.setColour(Slider::trackColourId, Colours::darkgrey);
     scHPFSlider.setColour(Slider::textBoxTextColourId, textColour);
     scHPFSlider.setSliderStyle(Slider::LinearBar);
     scHPFSlider.setAlpha(trackTransp);
 
-    scLPFSlider.setColour(Slider::trackColourId, Colour(165, 71, 7));
+    scLPFSlider.setColour(Slider::trackColourId, Colours::darkgrey);
     scLPFSlider.setColour(Slider::textBoxTextColourId, textColour);
     scLPFSlider.setSliderStyle(Slider::LinearBar);
     scLPFSlider.setAlpha(trackTransp);
+
+    scPeakFreqSlider.setColour(Slider::trackColourId, Colours::darkgrey);
+    scPeakFreqSlider.setColour(Slider::textBoxTextColourId, textColour);
+    scPeakFreqSlider.setSliderStyle(Slider::LinearBar);
+    scPeakFreqSlider.setAlpha(trackTransp);
+
+    scPeakGainSlider.setColour(Slider::trackColourId, Colours::darkgrey);
+    scPeakGainSlider.setColour(Slider::textBoxTextColourId, textColour);
+    scPeakGainSlider.setSliderStyle(Slider::LinearBar);
+    scPeakGainSlider.setAlpha(trackTransp);
 
     crossoverSlider.setTextBoxStyle(textBoxStyle, readonly, width, height);
     scHPFSlider.setTextBoxStyle(textBoxStyle, readonly, width, height);
