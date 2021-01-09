@@ -21,4 +21,4 @@ Changelog:
 - Fixed strange behaviour of channel input/output count when adding sidechain in DAW;
 - Added version numbering on GUI.
 
-![Screenshot](cymbalkiller2.png)
+![Screenshot](CymballKiller.png)
