@@ -17,5 +17,8 @@ Changelog:
 - 1.0.1 - Fixed strange behaviour on sidechain filters; <br />
 - 1.0.0 - Fixed strange behaviour of channel input/output count when adding sidechain in DAW; <br />
         - Added version numbering on GUI.
+        
+These plugins are free to use and I make them on my spare time. If you like them and are able to help by becoming a Patreon member, I would be very grateful.
+[Patreon](https://www.patreon.com/lowwavestudios)
 
 ![Screenshot](CymballKiller.png)
